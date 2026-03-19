@@ -1,0 +1,31 @@
+<<<<<<< HEAD
+=======
+/* App-level overrides — most styles live in index.css and Tailwind */
+
+textarea:focus {
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Step item slide-in */
+.step-enter {
+  animation: slideIn 0.25s ease both;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Screenshot fade */
+img[alt="Browser screenshot"] {
+  animation: screenshotFade 0.3s ease;
+}
+@keyframes screenshotFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+>>>>>>> 24833f7584bab0623c16eea0986eaa1ec7c113d1
