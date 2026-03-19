@@ -6,7 +6,9 @@ import sys
 import asyncio
 from typing import Dict, Any
 
-if sys.platform == "win32":
+
+
+if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect

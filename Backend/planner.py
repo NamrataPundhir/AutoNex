@@ -151,11 +151,8 @@ async def plan_task(prompt: str) -> List[Dict[str, Any]]:
         )
 
         raw = response.choices[0].message.content
-
         steps = extract_json(raw)
-
         steps = validate_steps(steps)
-
         return steps
 
     except Exception as e:

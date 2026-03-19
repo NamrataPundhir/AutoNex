@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
-import Aegisapp from './Aegisapp'
-
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <Aegisapp />
-    </>
-  )
-=======
 // src/App.jsx
 import { useState, useCallback } from 'react'
 import Navbar from './components/Navbar'
@@ -24,7 +7,6 @@ import { useWebSocket } from './hooks/useWebSocket'
 
 function generateSessionId() {
   return 'sess_' + Math.random().toString(36).slice(2, 9)
->>>>>>> 24833f7584bab0623c16eea0986eaa1ec7c113d1
 }
 
 export default function App() {
