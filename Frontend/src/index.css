@@ -1,3 +1,89 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg: #07090f;
+  --surface: #0e1118;
+  --surface2: #141820;
+  --border: #1a2030;
+  --accent: #00c8ff;
+  --accent2: #ff6230;
+  --accent3: #6affb0;
+  --warn: #ffc947;
+  --text: #dde2ef;
+  --muted: #5a6478;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); opacity: 0.5; }
+
+/* Grid background */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Glow effects */
+.glow-accent { box-shadow: 0 0 20px rgba(0,200,255,0.15); }
+.glow-accent2 { box-shadow: 0 0 20px rgba(255,98,48,0.15); }
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Step status colors */
+.step-running { color: var(--warn); }
+.step-success { color: var(--accent3); }
+.step-error   { color: #ff4d6d; }
+
+/* Typing cursor */
+.typing-cursor::after {
+  content: '|';
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Noise overlay */
+.noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.4;
+}
+
+/* Animated gradient border */
+@keyframes borderGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.border-glow {
+  animation: borderGlow 2s ease-in-out infinite;
+}
