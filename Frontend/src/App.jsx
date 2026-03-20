@@ -1,10 +1,11 @@
-// Frontend/src/App.jsx — AutoNex v3 · Browser Agent + Women Safety + Memory
+// Frontend/src/App.jsx — AutoNex v4 · Browser Agent + Memory + AI Chat Agent
 
 import { useState, useCallback } from 'react'
 import Navbar      from './components/Navbar'
 import Sidebar     from './components/Sidebar'
 import BrowserView from './components/BrowserView'
-import MemoryPanel from './components/MemoryPanel'        // ← NEW
+import MemoryPanel from './components/MemoryPanel'
+import ChatAgent   from './components/ChatAgent'       // ← NEW
 import { useWebSocket } from './hooks/useWebSocket'
 
 function generateSessionId() {
@@ -13,7 +14,8 @@ function generateSessionId() {
 
 const TABS = [
   { id: 'browser', label: 'Browser Agent', icon: '⬡' },
-  { id: 'memory',  label: 'Memory',        icon: '🧠' }, // ← NEW
+  { id: 'memory',  label: 'Memory',        icon: '🧠' },
+  { id: 'chat',    label: 'AI Agent',      icon: '🤖' }, // ← NEW
 ]
 
 export default function App() {
@@ -48,10 +50,9 @@ export default function App() {
     setTimeout(() => { setActiveTab(id); setFading(false) }, 110)
   }
 
-  // ── Replay a past task: switch to browser tab then send the prompt ──
+  // Replay a past task: switch to browser tab then send the prompt
   const handleReplay = useCallback((prompt) => {
     switchTab('browser')
-    // Small delay so tab switch animation completes first
     setTimeout(() => sendPrompt(prompt), 150)
   }, [sendPrompt])
 
@@ -68,25 +69,25 @@ export default function App() {
       <div style={{ position: 'relative', background: 'var(--color-background-primary)', padding: '0 20px', flexShrink: 0 }}>
         <div style={{ display: 'flex', gap: 2 }}>
           {TABS.map(tab => {
-            const active   = activeTab === tab.id
-            const isSafety = tab.id === 'safety'
+            const active  = activeTab === tab.id
             const isMemory = tab.id === 'memory'
+            const isChat   = tab.id === 'chat'
             return (
               <button
                 key={tab.id}
                 onClick={() => switchTab(tab.id)}
                 className={[
                   'an-tab',
-                  active   ? 'an-tab-active'  : '',
-                  isSafety ? 'an-tab-safety'  : '',
-                  isMemory ? 'an-tab-memory'  : '',
+                  active    ? 'an-tab-active' : '',
+                  isMemory  ? 'an-tab-memory'  : '',
+                  isChat    ? 'an-tab-chat'    : '',
                 ].join(' ')}
               >
                 <span className={[
                   'an-tab-icon',
-                  active   ? 'an-tab-icon-active'  : '',
-                  isSafety ? 'an-tab-icon-safety'  : '',
+                  active   ? 'an-tab-icon-active' : '',
                   isMemory ? 'an-tab-icon-memory'  : '',
+                  isChat   ? 'an-tab-icon-chat'    : '',
                 ].join(' ')}>
                   {tab.icon}
                 </span>
@@ -94,8 +95,8 @@ export default function App() {
                 {active && (
                   <span className={[
                     'an-tab-dot',
-                    isSafety ? 'an-tab-dot-safety' : '',
                     isMemory ? 'an-tab-dot-memory' : '',
+                    isChat   ? 'an-tab-dot-chat'   : '',
                   ].join(' ')} />
                 )}
               </button>
@@ -111,7 +112,7 @@ export default function App() {
         style={{ opacity: fading ? 0 : 1, transition: 'opacity 0.11s ease' }}
       >
 
-        {/* ── Browser Agent ──────────────────────────────────────── */}
+        {/* ── Browser Agent ────────────────────────────────────── */}
         {activeTab === 'browser' && (
           <>
             <Sidebar
@@ -130,17 +131,17 @@ export default function App() {
           </>
         )}
 
-        {/* ── Women Safety ────────────────────────────────────────── */}
-        {activeTab === 'safety' && (
-          <div style={{ flex: 1, overflowY: 'auto', background: 'var(--color-background-primary)' }}>
-            <WomenSafety />
-          </div>
-        )}
-
-        {/* ── Memory Panel ────────────────────────────────────────── */}
+        {/* ── Memory Panel ─────────────────────────────────────── */}
         {activeTab === 'memory' && (
           <div style={{ flex: 1, overflowY: 'auto', background: 'var(--color-background-primary)' }}>
             <MemoryPanel onReplay={handleReplay} />
+          </div>
+        )}
+
+        {/* ── AI Chat Agent ─────────────────────────────────────── */}
+        {activeTab === 'chat' && (
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
+            <ChatAgent sessionId={sessionId} />
           </div>
         )}
 
@@ -165,17 +166,17 @@ body,input,textarea,select,button{font-family:'DM Sans',system-ui,sans-serif!imp
 .an-tab-icon-active{color:var(--accent)!important}
 .an-tab-dot{position:absolute;top:9px;right:10px;width:4px;height:4px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
 
-/* Women Safety tab — red accent */
-.an-tab-safety:hover{background:rgba(239,68,68,.06)}
-.an-tab-safety.an-tab-active{border-bottom-color:#ef4444!important;background:linear-gradient(to bottom,transparent,rgba(239,68,68,.08))!important}
-.an-tab-icon-safety{color:#ef4444!important}
-.an-tab-dot-safety{background:#ef4444!important;box-shadow:0 0 6px rgba(239,68,68,.6)!important}
-
 /* Memory tab — purple accent */
 .an-tab-memory:hover{background:rgba(139,92,246,.06)}
 .an-tab-memory.an-tab-active{border-bottom-color:#8b5cf6!important;background:linear-gradient(to bottom,transparent,rgba(139,92,246,.08))!important}
 .an-tab-icon-memory{color:#8b5cf6!important}
 .an-tab-dot-memory{background:#8b5cf6!important;box-shadow:0 0 6px rgba(139,92,246,.6)!important}
+
+/* AI Chat tab — green/teal accent */
+.an-tab-chat:hover{background:rgba(0,229,160,.06)}
+.an-tab-chat.an-tab-active{border-bottom-color:#00e5a0!important;background:linear-gradient(to bottom,transparent,rgba(0,229,160,.08))!important}
+.an-tab-icon-chat{color:#00e5a0!important}
+.an-tab-dot-chat{background:#00e5a0!important;box-shadow:0 0 6px rgba(0,229,160,.6)!important}
 
 @keyframes raSpin{to{transform:rotate(360deg)}}
 @keyframes raFadeIn{from{opacity:0}to{opacity:1}}

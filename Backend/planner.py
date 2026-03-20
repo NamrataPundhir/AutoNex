@@ -229,7 +229,7 @@ async def _plan_single(prompt: str) -> List[Dict]:
     try:
         resp = await asyncio.wait_for(
             client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.3-70b-versatile",
                 temperature=0.1,
                 max_tokens=2000,
                 messages=[
