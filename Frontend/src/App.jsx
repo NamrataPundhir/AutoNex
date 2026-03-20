@@ -1,10 +1,10 @@
-// Frontend/src/App.jsx — AutoNex v3 · Browser Agent + Women Safety
+// Frontend/src/App.jsx — AutoNex v3 · Browser Agent + Women Safety + Memory
 
 import { useState, useCallback } from 'react'
-import Navbar from './components/Navbar'
-import Sidebar from './components/Sidebar'
+import Navbar      from './components/Navbar'
+import Sidebar     from './components/Sidebar'
 import BrowserView from './components/BrowserView'
-import WomenSafety from './components/WomenSafety'          // ← NEW
+import MemoryPanel from './components/MemoryPanel'        // ← NEW
 import { useWebSocket } from './hooks/useWebSocket'
 
 function generateSessionId() {
@@ -13,7 +13,7 @@ function generateSessionId() {
 
 const TABS = [
   { id: 'browser', label: 'Browser Agent', icon: '⬡' },
-  { id: 'safety',  label: 'Women Safety',  icon: '🛡' }, // ← NEW
+  { id: 'memory',  label: 'Memory',        icon: '🧠' }, // ← NEW
 ]
 
 export default function App() {
@@ -21,21 +21,25 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('browser')
   const [fading,    setFading]    = useState(false)
 
-  const { connected, status, steps, screenshot, currentUrl, planSteps, sendPrompt, clearSession } =
-    useWebSocket(sessionId)
+  const {
+    connected, status, steps, screenshot,
+    currentUrl, planSteps, sendPrompt, clearSession,
+  } = useWebSocket(sessionId)
 
   const handleStop = useCallback(async () => {
     try {
       await fetch('/api/stop', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId }),
+        body:    JSON.stringify({ session_id: sessionId }),
       })
     } catch (e) { console.error('Stop failed', e) }
   }, [sessionId])
 
   const handleNewSession = useCallback(() => {
-    handleStop(); clearSession(); setSessionId(generateSessionId())
+    handleStop()
+    clearSession()
+    setSessionId(generateSessionId())
   }, [handleStop, clearSession])
 
   const switchTab = (id) => {
@@ -44,8 +48,18 @@ export default function App() {
     setTimeout(() => { setActiveTab(id); setFading(false) }, 110)
   }
 
+  // ── Replay a past task: switch to browser tab then send the prompt ──
+  const handleReplay = useCallback((prompt) => {
+    switchTab('browser')
+    // Small delay so tab switch animation completes first
+    setTimeout(() => sendPrompt(prompt), 150)
+  }, [sendPrompt])
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'var(--bg, #0a0a0f)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div
+      className="flex flex-col h-screen overflow-hidden"
+      style={{ background: 'var(--bg, #0a0a0f)', fontFamily: "'DM Sans', system-ui, sans-serif" }}
+    >
       <style>{CSS}</style>
 
       <Navbar connected={connected} sessionId={sessionId} onNewSession={handleNewSession} />
@@ -56,17 +70,34 @@ export default function App() {
           {TABS.map(tab => {
             const active   = activeTab === tab.id
             const isSafety = tab.id === 'safety'
+            const isMemory = tab.id === 'memory'
             return (
               <button
                 key={tab.id}
                 onClick={() => switchTab(tab.id)}
-                className={`an-tab${active ? ' an-tab-active' : ''}${isSafety ? ' an-tab-safety' : ''}`}
+                className={[
+                  'an-tab',
+                  active   ? 'an-tab-active'  : '',
+                  isSafety ? 'an-tab-safety'  : '',
+                  isMemory ? 'an-tab-memory'  : '',
+                ].join(' ')}
               >
-                <span className={`an-tab-icon${active ? ' an-tab-icon-active' : ''}${isSafety ? ' an-tab-icon-safety' : ''}`}>
+                <span className={[
+                  'an-tab-icon',
+                  active   ? 'an-tab-icon-active'  : '',
+                  isSafety ? 'an-tab-icon-safety'  : '',
+                  isMemory ? 'an-tab-icon-memory'  : '',
+                ].join(' ')}>
                   {tab.icon}
                 </span>
                 {tab.label}
-                {active && <span className={`an-tab-dot${isSafety ? ' an-tab-dot-safety' : ''}`} />}
+                {active && (
+                  <span className={[
+                    'an-tab-dot',
+                    isSafety ? 'an-tab-dot-safety' : '',
+                    isMemory ? 'an-tab-dot-memory' : '',
+                  ].join(' ')} />
+                )}
               </button>
             )
           })}
@@ -75,21 +106,41 @@ export default function App() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 overflow-hidden" style={{ opacity: fading ? 0 : 1, transition: 'opacity 0.11s ease' }}>
+      <div
+        className="flex flex-1 overflow-hidden"
+        style={{ opacity: fading ? 0 : 1, transition: 'opacity 0.11s ease' }}
+      >
 
-        {/* Browser Agent */}
+        {/* ── Browser Agent ──────────────────────────────────────── */}
         {activeTab === 'browser' && (
           <>
-            <Sidebar connected={connected} status={status} steps={steps} planSteps={planSteps}
-              currentUrl={currentUrl} onSendPrompt={sendPrompt} onStop={handleStop} onClear={clearSession} />
-            <BrowserView screenshot={screenshot} currentUrl={currentUrl} status={status} />
+            <Sidebar
+              connected={connected} status={status}
+              steps={steps}        planSteps={planSteps}
+              currentUrl={currentUrl}
+              onSendPrompt={sendPrompt}
+              onStop={handleStop}
+              onClear={clearSession}
+            />
+            <BrowserView
+              screenshot={screenshot}
+              currentUrl={currentUrl}
+              status={status}
+            />
           </>
         )}
 
-        {/* Women Safety */}
+        {/* ── Women Safety ────────────────────────────────────────── */}
         {activeTab === 'safety' && (
           <div style={{ flex: 1, overflowY: 'auto', background: 'var(--color-background-primary)' }}>
             <WomenSafety />
+          </div>
+        )}
+
+        {/* ── Memory Panel ────────────────────────────────────────── */}
+        {activeTab === 'memory' && (
+          <div style={{ flex: 1, overflowY: 'auto', background: 'var(--color-background-primary)' }}>
+            <MemoryPanel onReplay={handleReplay} />
           </div>
         )}
 
@@ -119,6 +170,12 @@ body,input,textarea,select,button{font-family:'DM Sans',system-ui,sans-serif!imp
 .an-tab-safety.an-tab-active{border-bottom-color:#ef4444!important;background:linear-gradient(to bottom,transparent,rgba(239,68,68,.08))!important}
 .an-tab-icon-safety{color:#ef4444!important}
 .an-tab-dot-safety{background:#ef4444!important;box-shadow:0 0 6px rgba(239,68,68,.6)!important}
+
+/* Memory tab — purple accent */
+.an-tab-memory:hover{background:rgba(139,92,246,.06)}
+.an-tab-memory.an-tab-active{border-bottom-color:#8b5cf6!important;background:linear-gradient(to bottom,transparent,rgba(139,92,246,.08))!important}
+.an-tab-icon-memory{color:#8b5cf6!important}
+.an-tab-dot-memory{background:#8b5cf6!important;box-shadow:0 0 6px rgba(139,92,246,.6)!important}
 
 @keyframes raSpin{to{transform:rotate(360deg)}}
 @keyframes raFadeIn{from{opacity:0}to{opacity:1}}
