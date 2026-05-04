@@ -88,7 +88,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                 except Exception: pass
                 del active_sessions[session_id]
 
-            agent = BrowserAgent(session_id=session_id, headless=False)
+            agent = BrowserAgent(session_id=session_id, headless=True)
             active_sessions[session_id] = agent
 
             await manager.send_step(session_id, {
